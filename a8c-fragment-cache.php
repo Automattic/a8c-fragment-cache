@@ -19,7 +19,7 @@ mark_fragment_cacheable( 'api', '/wc/store/v1/products', function ( WP_REST_Requ
 
 // cache the cart request, as long as the cart has not changed.
 mark_fragment_cacheable( 'api', '/wc/store/v1/cart', function ( WP_REST_Request $request ) {
-	// Example of data leakage, this does not check against session key which is a big and will leak address info to other users.
+	// Example of data leakage, this does not check against session key which is a bug and will leak address info to other users.
 	// Key must depend on user's session if personal data is returned.
 	if ( is_null( WC()->cart ) ) {
 		return 'cart-empty';
@@ -110,16 +110,3 @@ function cache_api_response( $result, $server, $request ) {
 
 	return $result;
 }
-
-mark_fragment_cacheable( 'api', '/wc/store/v1/products', function ( WP_REST_Request $request ) {
-	$key = array_filter( $_GET );
-	return 'all-products-' . md5( serialize( $key ) . WC_Cache_Helper::get_cache_prefix( 'products') );
-} );
-
-
-mark_fragment_cacheable( 'api', '/wc/store/v1/cart', function ( WP_REST_Request $request ) {
-	if ( is_null( WC()->cart ) ) {
-		return 'cart-empty';
-	}
-	return 'cart-' .WC()->cart->get_cart_hash();
-} );
